@@ -20,6 +20,11 @@ Main bot class
 '''
 class Client(commands.Bot):
 
+    async def setup_hook(self):
+        # Register the Cog stuff
+        await self.load_extension("voice_cog")
+        DB.Debug("Loaded VoiceCog extension successfully.")
+
     # Runs when the bot turns on
     async def on_ready(self):
         DB.Debug(f'Logged on as {self.user}!')
@@ -27,6 +32,7 @@ class Client(commands.Bot):
         # Force load slash commands
         try:
             guild = discord.Object(id=os.getenv("DISCORD_SERVER_ID"))
+            self.tree.copy_global_to(guild=guild)
             synced = await self.tree.sync(guild=guild)
             DB.Debug(f'Synced {len(synced)} commands to guild {guild.id}')
         except Exception as e:
@@ -81,7 +87,7 @@ async def sayHello(interaction: discord.Interaction):
 
 # Default print out something (Example of arguements)
 @client.tree.command(name="print", description="I'll say anything", guild=GUILD_ID)
-async def sayHello(interaction: discord.Interaction, printer:str):
+async def sayPrint(interaction: discord.Interaction, printer:str):
     await interaction.response.send_message(printer)
 
 '''
@@ -89,7 +95,7 @@ async def sayHello(interaction: discord.Interaction, printer:str):
 '''
 # Default Embed (Think of a form - title, fields ect)
 @client.tree.command(name="embed", description="Embed example", guild=GUILD_ID)
-async def sayHello(interaction: discord.Interaction):
+async def sayEmbed(interaction: discord.Interaction):
     embed = discord.Embed(title="I am a Title", url="https://www.google.com/", description="I am the description", colour=discord.Colour.gold())
     embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=12580&format=png&color=000000")
     embed.add_field(name="Game Title:", value="The game name", inline=False)
@@ -114,5 +120,37 @@ class View(discord.ui.View):
 async def myButton(interaction: discord.Interaction):
     await interaction.response.send_message(view=View())
 
+'''
+----------------- Voice stuff --------------------
+'''
+'''class VoiceCog(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @app_commands.command(name="join", description="join your voice channel")
+    async def join(self, interaction: discord.Interaction):
+        if not interaction.user.voice or not interaction.user.voice.channel:
+            await interaction.response.send_message("You need to be in a voice channel for this to work Dumpfbacke", ephemeral=True)
+            return
+
+        channel = interaction.user.voice.channel
+
+        # Connect or move to channel
+        if interaction.guild.voice_client:
+            await interaction.guild.voice_client.move_to(channel)
+            await interaction.response.send_message(f"Moved to **{channel.name}**!")
+            DB.Debug(f"Joined channel successfully")
+        else:
+            await channel.connect()
+            await interaction.response.send_message(f"Joined **{channel.name}**!")
+            DB.Debug(f"Moved channel successfully")
+'''
+
+        # Check if the bot is in the channel.
+
 # Run the bot
+
+##async def setup(bot):
+  #await bot.add_cog(VoiceCog(bot))
+
 client.run(os.getenv("DISCORD_BOT_TOKEN"))
