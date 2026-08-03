@@ -90,6 +90,13 @@ async def sayHello(interaction: discord.Interaction):
 async def sayPrint(interaction: discord.Interaction, printer:str):
     await interaction.response.send_message(printer)
 
+# Shutdown the bot -- Testing only
+@client.tree.command(name="shutdown", description="Vhat is this?", guild=GUILD_ID)
+@app_commands.default_permissions(administrator=True)
+async def killProcess(interaction: discord.Interaction):
+    await interaction.response.send_message("**NEIN, NEIN, NEIN, NEIN, NEIN! FASS DAS NICHT AN, DU VOLLIDIOT, ODER ICH...**")
+    sys.exit()
+
 '''
 ----------------- Embed stuff --------------------
 '''
