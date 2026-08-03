@@ -51,7 +51,8 @@ class Client(commands.Bot):
 
     # Triggers when a user joins
     async def on_member_join(self, member):
-        await member.message.channel.send(f'Welcome in {member}')
+        # channel = bot.get_channel(CHANNEL_WELCOME)
+        # await channel.send(f"Welcome to the server, {member.mention}!")
         DB.Debug(f'Member joined: {member}')
 
 
@@ -82,6 +83,36 @@ async def sayHello(interaction: discord.Interaction):
 @client.tree.command(name="print", description="I'll say anything", guild=GUILD_ID)
 async def sayHello(interaction: discord.Interaction, printer:str):
     await interaction.response.send_message(printer)
+
+'''
+----------------- Embed stuff --------------------
+'''
+# Default Embed (Think of a form - title, fields ect)
+@client.tree.command(name="embed", description="Embed example", guild=GUILD_ID)
+async def sayHello(interaction: discord.Interaction):
+    embed = discord.Embed(title="I am a Title", url="https://www.google.com/", description="I am the description", colour=discord.Colour.gold())
+    embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=12580&format=png&color=000000")
+    embed.add_field(name="Game Title:", value="The game name", inline=False)
+    embed.add_field(name="Personal rating:", value="The game rating", inline=False)
+    embed.add_field(name="Original Price:", value="FREE")
+    embed.set_footer(text="Requires a minimum of 2 Green tick reactions")
+    embed.set_author(name=interaction.user.name)
+    await interaction.response.send_message(embed=embed)
+
+'''
+----------------- Button stuff --------------------
+'''
+class View(discord.ui.View):
+    @discord.ui.button(label="display_text", style=discord.ButtonStyle.green)
+    async def button_callback(self, button, interaction):
+        await button.response.send_message("Test button pressed.")
+
+    # Can put more buttons in here and set the class name to something else.
+
+# Default Button testing
+@client.tree.command(name="button", description="button test", guild=GUILD_ID)
+async def myButton(interaction: discord.Interaction):
+    await interaction.response.send_message(view=View())
 
 # Run the bot
 client.run(os.getenv("DISCORD_BOT_TOKEN"))
