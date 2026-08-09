@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 from discord import app_commands
-from backlog_modal import Feedback
+from backlog_modal import BackLog
+import backlog_printer
 
 import debugger as DB
 
@@ -105,14 +106,40 @@ async def killProcess(interaction: discord.Interaction):
 # Default Embed (Think of a form - title, fields ect)
 @client.tree.command(name="embed", description="Embed example", guild=GUILD_ID)
 async def sayEmbed(interaction: discord.Interaction):
-    embed = discord.Embed(title="I am a Title", url="https://www.google.com/", description="I am the description", colour=discord.Colour.gold())
+    embed = discord.Embed(title="I am a Title", url="https://www.google.com/", colour=discord.Colour.gold())
     embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=12580&format=png&color=000000")
-    embed.add_field(name="Game Title:", value="The game name", inline=False)
+    embed.add_field(name="Game Title:", value="The game name", inline=True)
     embed.add_field(name="Personal rating:", value="The game rating", inline=False)
-    embed.add_field(name="Original Price:", value="FREE")
+    embed.add_field(name="Original Price:", value="FREE", inline=True)
+    embed.add_field(name="Discounted: ", value=":white_check_mark:",inline=False)
     embed.set_footer(text="Requires a minimum of 2 Green tick reactions")
     embed.set_author(name=interaction.user.name)
     await interaction.response.send_message(embed=embed)
+
+## Print out the backlog
+@client.tree.command(name="print_backlog", description="I'll spit out your current backlog", guild=GUILD_ID)
+async def sayPrint(interaction: discord.Interaction):
+    await interaction.response.send_message("Printing ze backlog...")
+    all_games = backlog_printer.get_backlog_info()
+    for game in all_games:
+        embed = discord.Embed(title=game["title"], url=game["url"], colour=discord.Colour.gold())
+        embed.set_thumbnail(url=game["game_img"])
+
+        if (game["is_free"]):
+            embed.add_field(name="Price:", value="FREE", inline=True)
+        else:
+            embed.add_field(name="USD Price:", value=game["price_USD"], inline=True)
+            embed.add_field(name="EUR Price:", value=game["price_EUR"], inline=True)
+            embed.add_field(name="ZAR Price:", value=game["price_ZAR"], inline=True)
+            if (game["is_discounted"]):
+                embed.add_field(name="Discounted: ", value=":white_check_mark:",inline=True)
+                embed.add_field(name="%: ", value=game["discount %"],inline=True)
+            else:
+                embed.add_field(name="Discounted: ", value=":x:",inline=False)
+
+        embed.add_field(name="Description: ",value=game["reasoning"], inline=False)
+
+        await interaction.followup.send(embed=embed)
 
 '''
 ----------------- Button stuff --------------------
@@ -132,9 +159,9 @@ async def myButton(interaction: discord.Interaction):
 '''
 ----------------- Modal stuff --------------------
 '''
-@client.tree.command(guild=GUILD_ID, description='modal test')
-async def feedback(interaction: discord.Interaction):
-    await interaction.response.send_modal(Feedback())
+@client.tree.command(guild=GUILD_ID, description='submit a game to the backlog')
+async def backlog(interaction: discord.Interaction):
+    await interaction.response.send_modal(BackLog())
 
 # Run the bot
 
