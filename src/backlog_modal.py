@@ -3,11 +3,7 @@ import discord
 import steam_fetch
 import json
 
-class BackLog(discord.ui.Modal, title='Feedback'):
-    name = discord.ui.TextInput(
-        label='Name',
-        placeholder='Your name here...',
-    )
+class BackLog(discord.ui.Modal, title='BackLog adder'):
 
     game_title = discord.ui.TextInput(
         label="Game Title:",
@@ -47,8 +43,7 @@ class BackLog(discord.ui.Modal, title='Feedback'):
         with open(file_name, "w") as f:
             f.write(data)
 
-        await interaction.response.send_message(f'Achtung: {self.name.value} has submitted {temp} for the backlog!')
+        await interaction.response.send_message(f'Achtung: {temp} successfully submitted for the backlog!')
 
     async def on_error(self, interaction: discord.Interaction, error: Exception):
-        await interaction.response.send_message('OH NEIN! Its either broken or that title already exists!', ephemeral=True)            
-
+        await interaction.response.send_message('OH NEIN! Its either broken or that title already exists!', ephemeral=True)

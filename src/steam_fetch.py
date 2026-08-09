@@ -109,6 +109,6 @@ def do_we_have_it(title):
     return False
 
 ## Example usage
-results = get_game_info("Cyberpunk 2077")
-print(results["title"].replace(' ', ''))
+#results = get_game_info("Cyberpunk 2077")
+#print(results["title"].replace(' ', ''))
 #print(do_we_have_it("Cyberpunk2077"))

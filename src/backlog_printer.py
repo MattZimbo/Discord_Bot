@@ -1,8 +1,11 @@
 from pathlib import Path
 import json
+import os
+
+STORAGE = "../data/back_log"
 
 def get_backlog_info():
-    storage_path = Path("../data/back_log")
+    storage_path = Path(STORAGE)
     all_data = []
 
     for file in storage_path.glob("*.json"):
@@ -14,8 +17,27 @@ def get_backlog_info():
         except (json.JSONDecodeError, OSError) as e:
             print(f"Failed to read or parse {file.name}: {e}")
 
-    print("done")
-    print(all_data)
     return all_data
 
-get_backlog_info()
+def get_list():
+    storage_path = Path(STORAGE)
+    all_names = []
+    count = 1
+    for file in storage_path.glob("*.json"):
+        if count >= 25:
+            break
+        try:
+            with file.open("r") as f:
+                data = json.load(f)
+
+                all_names.append(data["title"])
+        except (json.JSONDecodeError, OSError) as e:
+            print(f"Failed to read or parse {file.name}: {e}")
+        count += 1
+
+    return all_names
+
+def deleted_log(game):
+    game = game.replace(' ', '') + ".json"
+
+    os.remove(STORAGE + '/' + game)

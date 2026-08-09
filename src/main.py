@@ -7,6 +7,7 @@ from discord.ext import commands
 from discord import app_commands
 from backlog_modal import BackLog
 import backlog_printer
+from view_messages import DeleteBackLog
 
 import debugger as DB
 
@@ -48,7 +49,7 @@ class Client(commands.Bot):
         if message.author == self.user:
             return
 
-        if message.content.startswith('hello'):
+        if message.content.startswith('Hans'):
             await message.channel.send(f"Hi there {message.author}")
 
         DB.Debug(f'Message from {message.author}: {message.content}')
@@ -162,6 +163,18 @@ async def myButton(interaction: discord.Interaction):
 @client.tree.command(guild=GUILD_ID, description='submit a game to the backlog')
 async def backlog(interaction: discord.Interaction):
     await interaction.response.send_modal(BackLog())
+
+'''
+----------------- view messages --------------------
+'''
+
+@client.tree.command(guild=GUILD_ID, description='Delete a game from the backlog')
+async def delete_backlog(interaction: discord.Interaction):
+    user_games = backlog_printer.get_list()
+
+    view = DeleteBackLog(user_games)
+    await interaction.response.send_message("Select a game to remove:", view=view, ephemeral=True)
+
 
 # Run the bot
 
