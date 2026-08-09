@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 from discord import app_commands
+from backlog_modal import Feedback
 
 import debugger as DB
 
@@ -20,9 +21,10 @@ Main bot class
 '''
 class Client(commands.Bot):
 
-    async def setup_hook(self):
-        # Register the Cog stuff
+    # Register the Cog stuff
+    async def setup_hook(self): 
         await self.load_extension("voice_cog")
+        #await self.load_extension("backlog_modal")
         DB.Debug("Loaded VoiceCog extension successfully.")
 
     # Runs when the bot turns on
@@ -128,32 +130,11 @@ async def myButton(interaction: discord.Interaction):
     await interaction.response.send_message(view=View())
 
 '''
------------------ Voice stuff --------------------
+----------------- Modal stuff --------------------
 '''
-'''class VoiceCog(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
-    @app_commands.command(name="join", description="join your voice channel")
-    async def join(self, interaction: discord.Interaction):
-        if not interaction.user.voice or not interaction.user.voice.channel:
-            await interaction.response.send_message("You need to be in a voice channel for this to work Dumpfbacke", ephemeral=True)
-            return
-
-        channel = interaction.user.voice.channel
-
-        # Connect or move to channel
-        if interaction.guild.voice_client:
-            await interaction.guild.voice_client.move_to(channel)
-            await interaction.response.send_message(f"Moved to **{channel.name}**!")
-            DB.Debug(f"Joined channel successfully")
-        else:
-            await channel.connect()
-            await interaction.response.send_message(f"Joined **{channel.name}**!")
-            DB.Debug(f"Moved channel successfully")
-'''
-
-        # Check if the bot is in the channel.
+@client.tree.command(guild=GUILD_ID, description='modal test')
+async def feedback(interaction: discord.Interaction):
+    await interaction.response.send_modal(Feedback())
 
 # Run the bot
 
