@@ -1,0 +1,29 @@
+services:
+  # Service 1: Lavalink Audio Node
+  lavalink:
+    image: ghcr.io/lavalink-devs/lavalink:4
+    container_name: bot_lavalink
+    restart: always
+    environment:
+      - _JAVA_OPTIONS=-Xmx512m
+      - LAVALINK_URI=${LAVA_LINK}
+      - LAVALINK_PASSWORD=${LAVA_PASSWORD}
+    volumes:
+      - ./lavalink/application.yml:/opt/Lavalink/application.yml
+      - ./lavalink/plugins:/opt/Lavalink/plugins
+    ports:
+      - "2333:2333"
+
+  # Service 2: Python Discord Bot
+  bot:
+    build: .
+    container_name: discord_bot
+    restart: always
+    environment:
+      - DISCORD_TOKEN=${DISCORD_BOT_TOKEN}
+      # Pass your hosted Atlas URI (e.g. mongodb+srv://user:pass@cluster.mongodb.net/...)
+      - MONGO_URI=${MONGO_URI}
+      - LAVALINK_URI=${LAVA_LINK}
+      - LAVALINK_PASSWORD=${LAVA_PASSWORD}
+    depends_on:
+      - lavalink
