@@ -1,6 +1,5 @@
 # Default libraries + Dotenv
 import os
-import sys
 from dotenv import load_dotenv
 load_dotenv()
 # Discord libs
@@ -10,9 +9,6 @@ from discord import app_commands
 # MongoDB
 import motor.motor_asyncio
 # Scripts
-from backlog_modal import BackLog
-import backlog_printer
-from view_messages import DeleteBackLog
 import debugger as DB
 
 
@@ -37,7 +33,8 @@ class Client(commands.Bot):
         self.db = self.mongo_client["HansDB"]
 
         await self.load_extension("voice_cog")
-        DB.Debug("Loaded VoiceCog extension successfully.")
+        await self.load_extension("backlog_cog")
+        DB.Debug("Loaded Cog extensions successfully.")
 
     # Runs when the bot turns on
     async def on_ready(self):
@@ -132,13 +129,18 @@ intents.message_content = True
 # NOTE: Command prefixs are redundant, but required in the code for some reason.
 client = Client(command_prefix=";", intents=intents)
 
+
+'''
+Note the below are all tutorial examples included as reminders of what to do and for debugging
+'''
+
 '''
 -----------------------------------------------------
 ----------------- SLASH COMMANDS --------------------
 -----------------------------------------------------
 '''
 # Specify our server to prevent propegation
-try:
+'''try:
     GUILD_ID = discord.Object(id=os.getenv("DISCORD_SERVER_ID"))
 except Exception as e:
     DB.Debug(f"Server ID malfunction. Double check ID. Error {e}")
@@ -162,7 +164,7 @@ async def killProcess(interaction: discord.Interaction):
     sys.exit()
 
 '''
------------------ Embed stuff --------------------
+#----------------- Embed stuff --------------------
 '''
 # Default Embed (Think of a form - title, fields ect)
 @client.tree.command(name="embed", description="Embed example", guild=GUILD_ID)
@@ -177,33 +179,9 @@ async def sayEmbed(interaction: discord.Interaction):
     embed.set_author(name=interaction.user.name)
     await interaction.response.send_message(embed=embed)
 
-## Print out the backlog
-@client.tree.command(name="print_backlog", description="I'll spit out your current backlog", guild=GUILD_ID)
-async def sayPrint(interaction: discord.Interaction):
-    await interaction.response.send_message("Printing ze backlog...")
-    all_games = backlog_printer.get_backlog_info()
-    for game in all_games:
-        embed = discord.Embed(title=game["title"], url=game["url"], colour=discord.Colour.gold())
-        embed.set_thumbnail(url=game["game_img"])
-
-        if (game["is_free"]):
-            embed.add_field(name="Price:", value="FREE", inline=True)
-        else:
-            embed.add_field(name="USD Price:", value=game["price_USD"], inline=True)
-            embed.add_field(name="EUR Price:", value=game["price_EUR"], inline=True)
-            embed.add_field(name="ZAR Price:", value=game["price_ZAR"], inline=True)
-            if (game["is_discounted"]):
-                embed.add_field(name="Discounted: ", value=":white_check_mark:",inline=True)
-                embed.add_field(name="%: ", value=game["discount %"],inline=True)
-            else:
-                embed.add_field(name="Discounted: ", value=":x:",inline=False)
-
-        embed.add_field(name="Description: ",value=game["reasoning"], inline=False)
-
-        await interaction.followup.send(embed=embed)
 
 '''
------------------ Button stuff --------------------
+#----------------- Button stuff --------------------
 '''
 class View(discord.ui.View):
     @discord.ui.button(label="display_text", style=discord.ButtonStyle.green)
@@ -216,26 +194,7 @@ class View(discord.ui.View):
 @client.tree.command(name="button", description="button test", guild=GUILD_ID)
 async def myButton(interaction: discord.Interaction):
     await interaction.response.send_message(view=View())
-
 '''
------------------ Modal stuff --------------------
-'''
-@client.tree.command(guild=GUILD_ID, description='submit a game to the backlog')
-async def backlog(interaction: discord.Interaction):
-    await interaction.response.send_modal(BackLog())
-
-'''
------------------ view messages --------------------
-'''
-
-@client.tree.command(guild=GUILD_ID, description='Delete a game from the backlog')
-async def delete_backlog(interaction: discord.Interaction):
-    user_games = backlog_printer.get_list()
-
-    view = DeleteBackLog(user_games)
-    await interaction.response.send_message("Select a game to remove:", view=view, ephemeral=True)
-
-
 # Run the bot
 
 ##async def setup(bot):

@@ -34,7 +34,7 @@ class VoiceCog(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
 
-  @app_commands.command(name="join", description="Makes the HANS join your voice channel")
+  @app_commands.command(name="join", description="Makes Hans join your voice channel")
   # This function controls the voice channel hans is in
   async def join(self, interaction: discord.Interaction):
     if not interaction.user.voice or not interaction.user.voice.channel:

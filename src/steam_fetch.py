@@ -2,16 +2,16 @@
 This file relates to all information required to make our backlog
 functionality function.
 '''
-
-
+# Necessary libs
 import requests
-from pathlib import Path
+# Mongo DB libs
+from motor.motor_asyncio import AsyncIOMotorDatabase
 
 '''
 Calls steams endpoint API to find a game 
 and pull its details
 '''
-def get_game_info(game):
+async def get_game_info(db: AsyncIOMotorDatabase, guild_id: str, game: str, reasoning: str):
 
     # Get the app ID so users don't have to
     url = f"https://store.steampowered.com/api/storesearch/?term={game}&l=english&cc=US"
@@ -24,6 +24,14 @@ def get_game_info(game):
     top_result = response['items'][0]
     game_id = top_result['id']
     game_title = top_result['name']
+
+    collection = db["backlog"]
+    existing = await collection.find_one({"guild_id": str(guild_id), "title": game_title})
+
+    if existing:
+        print(existing)
+        print("yep")
+        return "failed"
 
     # Ping the steam endpoint with the app ID
     details = f"https://store.steampowered.com/api/appdetails?appids={game_id}&cc=US"
@@ -59,7 +67,8 @@ def get_game_info(game):
             "url"           : f"https://store.steampowered.com/app/{game_id}",
             "price"         : "Free to Play",
             "is_discounted"    : False,
-            "is_free"       : True
+            "is_free"       : True,
+            "reasoning"     : reasoning
         }
 
     price_data = data.get('price_overview')
@@ -70,6 +79,7 @@ def get_game_info(game):
     discount_perc = price_data.get('discount_percent', 0)
     is_discounted = discount_perc > 0
 
+
     if (is_discounted):
         return {
             "title"         : game_title,
@@ -77,10 +87,11 @@ def get_game_info(game):
             "url"           : f"https://store.steampowered.com/app/{game_id}",
             "price_USD"     : price_data['final_formatted'],
             "price_EUR"     : "\u20ac" + price_de['final_formatted'][:-1],
-            "price_ZAR"     : price_za['final_formatted'],
-            "is_discounted"    : is_discounted,
-            "discount %"    : discount_perc,
-            "is_free"       : False
+            "price_ZAR"     : price_za['final_formatted'].replace(' ', ''),
+            "is_discounted" : is_discounted,
+            "discount_%"    : str(discount_perc),
+            "is_free"       : False,
+            "reasoning"     : reasoning
         }
     else:
         return {
@@ -89,26 +100,8 @@ def get_game_info(game):
             "url"           : f"https://store.steampowered.com/app/{game_id}",
             "price_USD"     : price_data['final_formatted'],
             "price_EUR"     : price_de['final_formatted'],
-            "price_ZAR"     : price_za['final_formatted'],
-            "is_discounted"    : is_discounted,
-            "is_free"       : False
+            "price_ZAR"     : price_za['final_formatted'].replace(' ', ''),
+            "is_discounted" : is_discounted,
+            "is_free"       : False,
+            "reasoning"     : reasoning
         }
-
-'''
-Checking if the games been added to the backlog already
-'''
-
-def do_we_have_it(title):
-    title = title + ".json"
-    storage_path = Path("../data/back_log")
-
-    for entry in storage_path.glob("*.json"):
-        if title in entry.name:
-            return True
-
-    return False
-
-## Example usage
-#results = get_game_info("Cyberpunk 2077")
-#print(results["title"].replace(' ', ''))
-#print(do_we_have_it("Cyberpunk2077"))

@@ -5,7 +5,11 @@ import discord
 from discord.utils import MISSING
 # Scripts
 import steam_fetch
-from DB_backlog import submit_game_info, get_server_games
+from DB_backlog import submit_game_info, get_server_games, remove_game
+
+'''
+------------------- MODAL UI -------------------------
+'''
 
 class BackLog(discord.ui.Modal, title='BackLog adder'):
 
@@ -32,16 +36,52 @@ class BackLog(discord.ui.Modal, title='BackLog adder'):
 
     # Take a new game for the backlog, and add it to the database.
     async def on_submit(self, interaction: discord.Interaction):
-        data = steam_fetch.get_game_info(self.game_title.value, self.reasoning.value)
+        data = await steam_fetch.get_game_info(self.db, str(interaction.guild_id), self.game_title.value, self.reasoning.value)
+        print(data)
         if (data == "failed"):
-            self.on_error()
+            return await interaction.response.send_message(f"This game is already in the backlog! Move along - Move along...", ephemeral=True)
 
         # Logic to check if we already have it
         await submit_game_info(self.db, str(interaction.guild_id), str(interaction.user.id), data)
         await interaction.response.send_message(f'Game information for {data["title"]} retrieved successfully!', ephemeral=True)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception):
-        await interaction.response.send_message('OH NEIN! Its either broken or that title already exists!', ephemeral=True)
+        print(f"User ran into an error: {error}")
+        await interaction.response.send_message('OH NEIN! Its broken again! Vhat on earth did you try to backlog?', ephemeral=True)
+
+'''
+------------------- VIEW MESSAGE UI -------------------------
+'''
+
+class DeleteBackLog(discord.ui.View):
+    def __init__(self, options_list, db):
+        super().__init__(timeout=10)
+        self.db = db
+
+        #NOTE:  Discord allows up to 25 options
+        select_options = [ discord.SelectOption(label=game, value=game) for game in options_list[:25] ]
+
+        self.select = discord.ui.Select(
+            placeholder="Choose a game to remove: ",
+            options=select_options,
+        )
+        self.select.callback = self.select_callback
+        self.add_item(self.select)
+
+    async def select_callback(self, interaction: discord.Interaction):
+        selected_game = self.select.values[0]
+
+        # Disable and delete
+        self.select.disabled = True
+        self.stop()
+
+        ## Call remove function here.
+        await remove_game(self.db, str(interaction.guild_id), selected_game)
+        await interaction.response.send_message(f"Successfully deleted **{selected_game}** from your backlog!")
+
+'''
+------------------- ACTUAL COG -------------------------
+'''
 
 class BacklogCog(commands.Cog):
     def __init__(self, bot):
@@ -69,13 +109,26 @@ class BacklogCog(commands.Cog):
                 embed.add_field(name="ZAR Price:", value=game["price_ZAR"], inline=True)
                 if (game["is_discounted"]):
                     embed.add_field(name="Discounted: ", value=":white_check_mark:",inline=True)
-                    embed.add_field(name="%: ", value="%" + game["discount %"],inline=True)
+                    embed.add_field(name="%: ", value="%" + game["discount_%"],inline=True)
                 else:
                     embed.add_field(name="Discounted: ", value=":x:",inline=False)
 
             embed.add_field(name="Description: ",value=game["reasoning"], inline=False)
 
             await interaction.followup.send(embed=embed)
+
+    ## Remove a game from the backlog
+    @app_commands.command(name= "remove_backlog", description='Remove a game from the backlog')
+    async def delete_backlog(self, interaction: discord.Interaction):
+        
+        user_games = await get_server_games(self.bot.db, str(interaction.guild_id))
+
+        if not user_games:
+            return await interaction.response.send_message("No games submitted yet!")
+
+        title_list = [f"{g["title"]}" for g in user_games]
+        view = DeleteBackLog(title_list, self.bot.db)
+        await interaction.response.send_message("Select a game to remove:", view=view, ephemeral=True)
 
 # Load the BackLogCog
 async def setup(bot):
