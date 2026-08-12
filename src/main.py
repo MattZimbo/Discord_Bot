@@ -9,7 +9,7 @@ from discord import app_commands
 # MongoDB
 import motor.motor_asyncio
 # Scripts
-import debugger as DB
+import components.debugger as DB
 
 
 # Debug flag
@@ -32,9 +32,12 @@ class Client(commands.Bot):
         self.mongo_client = motor.motor_asyncio.AsyncIOMotorClient(uri)
         self.db = self.mongo_client["HansDB"]
 
-        await self.load_extension("voice_cog")
-        await self.load_extension("backlog_cog")
+        # Cogs setup
+        await self.load_extension("cogs.voice_cog")
+        await self.load_extension("cogs.backlog_cog")
         DB.Debug("Loaded Cog extensions successfully.")
+
+        
 
     # Runs when the bot turns on
     async def on_ready(self):
@@ -73,6 +76,8 @@ class Client(commands.Bot):
         print("Checked and initilised all server settings.")
 
 
+
+
     # When a message is sent in the server, print the content and sender
     async def on_message(self, message):
         # ignore self
@@ -84,10 +89,16 @@ class Client(commands.Bot):
 
         DB.Debug(f'Message from {message.author}: {message.content}')
 
+
+
+
     # When a user reacts to an event
     async def on_reaction_add(self, reaction, user):
         await reaction.message.channel.send(f'You reacted with {reaction}')
         DB.Debug(f'Reaction from {user} with {reaction}')
+
+
+
 
     # Triggers when a user joins
     async def on_member_join(self, member):
@@ -95,10 +106,16 @@ class Client(commands.Bot):
         # await channel.send(f"Welcome to the server, {member.mention}!")
         DB.Debug(f'Member joined: {member}')
 
+
+
+
     # Close mongo_DB connections
     async def close(self):
         self.mongo_client.close()
         await super().close()
+
+
+
 
     # Add new servers contents to MONGO
     async def on_guild_join(self, guild: discord.Guild):
@@ -123,12 +140,17 @@ class Client(commands.Bot):
         print(f"Initialized settings for new server: {guild.name} ({guild.id})")
 
 
+
+
+
 intents = discord.Intents.default()
 intents.message_content = True
 
 # NOTE: Command prefixs are redundant, but required in the code for some reason.
 client = Client(command_prefix=";", intents=intents)
 
+
+client.run(os.getenv("DISCORD_BOT_TOKEN"))
 
 '''
 Note the below are all tutorial examples included as reminders of what to do and for debugging
@@ -195,9 +217,3 @@ class View(discord.ui.View):
 async def myButton(interaction: discord.Interaction):
     await interaction.response.send_message(view=View())
 '''
-# Run the bot
-
-##async def setup(bot):
-  #await bot.add_cog(VoiceCog(bot))
-
-client.run(os.getenv("DISCORD_BOT_TOKEN"))

@@ -4,8 +4,8 @@ from discord.ext import commands
 import discord
 from discord.utils import MISSING
 # Scripts
-import steam_fetch
-from DB_backlog import submit_game_info, get_server_games, remove_game
+import components.steam_fetch as steam_fetch
+from database.DB_backlog import submit_game_info, get_server_games, remove_game
 
 '''
 ------------------- MODAL UI -------------------------
