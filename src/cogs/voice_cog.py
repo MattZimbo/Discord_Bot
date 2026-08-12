@@ -24,6 +24,20 @@ class VoiceCog(commands.Cog):
 
         return player
 
+    ### Event listeners -- Helpers to do basic tasks.
+    
+    ## If music player stops, but still songs in the queue, play.
+    @commands.Cog.listener()
+    async def on_track_end(self, payload: wavelink.TrackEndEventPayload):
+        player = payload.player
+        if not player:
+            return
+
+        if not player.queue.is_empty:
+            next_track = player.queue.get()
+            await player.play(next_track)
+
+    ### App commands
 
     ## Join the voice chennel.
     @app_commands.command(name="join", description="Makes Hans join your voice channel")
@@ -102,7 +116,33 @@ class VoiceCog(commands.Cog):
         else:
             await interaction.response.send_message('Nothing is currently playing.', ephemeral=True)
 
+    ## Skips the current track
+    @app_commands.command(name="skip", description="Skip ze current song")
+    async def skip(self, interaction: discord.Interaction):
+        player: wavelink.Player = getattr(interaction.guild, "voice_client", None)
+        if player and (player.playing and not player.queue.is_empty):
+            await player.skip()
+            await interaction.response.send_message(f'Skipped ze current track at the request of one... {interaction.user.name}')
+        else:
+            await interaction.response.send_message('Nothing is currently playing, or there is nothing in the queue', ephemeral=True)
 
+    ## Skips the current track
+    @app_commands.command(name="skip_to", description="Skip ze current song")
+    async def skip_to(self, interaction: discord.Interaction, count: str):
+        player: wavelink.Player = getattr(interaction.guild, "voice_client", None)
+        if player and (player.playing and not player.queue.is_empty):
+            try:
+                song = player.queue.get_at(int(count))
+                for i in range(int(count)):
+                    await player.skip()
+
+                await interaction.response.send_message(f'Skipped {count} songs at the request of {interaction.user.name}')
+            except IndexError as e:
+                await interaction.response.send_message(f'There are not that many items in the the queue!')
+            except ValueError as e:
+                await interaction.response.send_message(f'{count} is not a number Fische mit geringer Intelligenz')
+        else:
+            await interaction.response.send_message('Nothing is currently playing, or there is nothing in the queue', ephemeral=True)
 
 async def setup(bot):
     await bot.add_cog(VoiceCog(bot))
