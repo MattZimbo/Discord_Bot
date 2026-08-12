@@ -43,7 +43,7 @@ class BackLog(discord.ui.Modal, title='BackLog adder'):
 
         # Logic to check if we already have it
         await submit_game_info(self.db, str(interaction.guild_id), str(interaction.user.id), data)
-        await interaction.response.send_message(f'Game information for {data["title"]} retrieved successfully!', ephemeral=True)
+        await interaction.response.send_message(f'Game information for {data["title"]} added to the backlog by {interaction.user.name}!')
 
     async def on_error(self, interaction: discord.Interaction, error: Exception):
         print(f"User ran into an error: {error}")

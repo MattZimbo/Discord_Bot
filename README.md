@@ -16,3 +16,9 @@
 - docker compose up --build
 ### Clean shutdown and cache remove
 - docker compose down
+
+## TODO:
+- Add a size limit to the backlog.
+- Add array adding for playlists through modals.
+- Catch errors properly on playlist_db
+- Update debug wrapper to either wrap python logger or scrap entirely.
