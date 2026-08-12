@@ -1,4 +1,12 @@
 .env
+*.env
 venv
 data/
 *.pyc
+__pychache__/
+
+/lavalink/plugins/*.jar
+/lavalink/logs/
+
+.vscode/
+*.sh
