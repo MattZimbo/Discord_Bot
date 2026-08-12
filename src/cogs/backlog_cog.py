@@ -5,7 +5,7 @@ import discord
 from discord.utils import MISSING
 # Scripts
 import components.steam_fetch as steam_fetch
-from database.DB_backlog import submit_game_info, get_server_games, remove_game
+from database.backlog_DB import submit_game_info, get_server_games, remove_game
 
 '''
 ------------------- MODAL UI -------------------------

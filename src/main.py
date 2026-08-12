@@ -10,6 +10,8 @@ from discord import app_commands
 import motor.motor_asyncio
 # Scripts
 import components.debugger as DB
+# Wavelink
+import wavelink
 
 
 # Debug flag
@@ -31,6 +33,21 @@ class Client(commands.Bot):
         uri = f"mongodb+srv://{Username}:{Password}@hansdb.s0wgibr.mongodb.net/?appName=HansDB"
         self.mongo_client = motor.motor_asyncio.AsyncIOMotorClient(uri)
         self.db = self.mongo_client["HansDB"]
+
+        #Lavalink and wavelink setup
+        lavalink_uri = os.getenv("LAVA_LINK")
+        lavalink_password = os.environ.get("LAVA_PASSWORD")
+
+        node = wavelink.Node(
+            identifier="MainNode",
+            uri=lavalink_uri,
+            password=lavalink_password,
+            retries = 10
+        )
+        
+        # Connect the node pool to your bot
+        await wavelink.Pool.connect(nodes=[node], client=self)
+        DB.Debug("Connected to Lavalink Audio Node!")
 
         # Cogs setup
         await self.load_extension("cogs.voice_cog")
@@ -138,9 +155,6 @@ class Client(commands.Bot):
         )
 
         print(f"Initialized settings for new server: {guild.name} ({guild.id})")
-
-
-
 
 
 intents = discord.Intents.default()
