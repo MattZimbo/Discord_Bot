@@ -36,41 +36,41 @@ A simplistic `Discord Bot` built to entertain members of my server through the D
 3) Setup the Bots logging functionality to track user actions in a server for admin review
 4) TBD.
 
-## Mongo Database Schema:
-- Server_settings schema:
-{
-  guild_id: '{discord ID}',         --> Identifier of the server
-  guild_name: '{discord Name}',     --> Servers Name at the time of join
-  joined_date: '{DateTime}',        --> DateTime that the bot joined a server
-  log_channel_id: {discord ID},     --> ID of the server's logging chanel
-  welcome_channel_id: {discord ID}  --> ID of the server's welcome chanel
+## Mongo Database Schema:  
+- Server_settings schema:  
+{  
+  guild_id: '{discord ID}',         --> Identifier of the server  
+  guild_name: '{discord Name}',     --> Servers Name at the time of join  
+  joined_date: '{DateTime}',        --> DateTime that the bot joined a server  
+  log_channel_id: {discord ID},     --> ID of the server's logging chanel  
+  welcome_channel_id: {discord ID}  --> ID of the server's welcome chanel  
 }
 
-- Backlog Schema:
-{ 
-  guild_id: '{discord ID}',     --> Identifier of the server it was created in
-  Submitted_by: '{discord ID}', --> Identifier of the player who submitted it
-  title: '{str}',               --> Game title
-  game_img: '{url}',            --> Link to game thumbnail
-  price_USD: '${float}',        --> Price in USD
-  price_EUR: '€{float}',        --> Price in Euro
-  price_ZAR: 'R{float}',        --> Price in Rand
-  is_discounted: true,          --> Discount indicator
-  'discount_%': '{int}',        --> Discount percentage
-  is_free: false,               --> Denotes where the game is free.
-  reasoning: '{str}'            --> Reason the player added the game to the backlog
+- Backlog Schema:  
+{   
+  guild_id: '{discord ID}',     --> Identifier of the server it was created in  
+  Submitted_by: '{discord ID}', --> Identifier of the player who submitted it  
+  title: '{str}',               --> Game title  
+  game_img: '{url}',            --> Link to game thumbnail  
+  price_USD: '${float}',        --> Price in USD  
+  price_EUR: '€{float}',        --> Price in Euro  
+  price_ZAR: 'R{float}',        --> Price in Rand  
+  is_discounted: true,          --> Discount indicator  
+  'discount_%': '{int}',        --> Discount percentage  
+  is_free: false,               --> Denotes where the game is free  
+  reasoning: '{str}'            --> Reason the player added the game to the backlog  
 }
 
-- Playlist Schema (In progress):
-{
-  guild_id: '{discord ID}',     --> Identifier of the server it was created in
-  playlist_title: '{str}',      --> Name of the playlist
-  Submitted_by: '{discord ID}', --> Identifier of the player who submitted it
-  songs: [                      --> List of Songs in playlist
-    {
-      title: '{str}'            --> Song titles
-    }
-  ]
+- Playlist Schema (In progress):  
+{  
+  guild_id: '{discord ID}',     --> Identifier of the server it was created in  
+  playlist_title: '{str}',      --> Name of the playlist  
+  Submitted_by: '{discord ID}', --> Identifier of the player who submitted it  
+  songs: [                      --> List of Songs in playlist  
+    {  
+      title: '{str}'            --> Song titles  
+    }  
+  ]  
 }
 
 
