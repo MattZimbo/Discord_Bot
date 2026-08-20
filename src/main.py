@@ -52,6 +52,7 @@ class Client(commands.Bot):
         # Cogs setup
         await self.load_extension("cogs.voice_cog")
         await self.load_extension("cogs.backlog_cog")
+        await self.load_extension("cogs.playlist_cog")
         DB.Debug("Loaded Cog extensions successfully.")
 
         
