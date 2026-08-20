@@ -63,15 +63,8 @@ class VoiceCog(commands.Cog):
         if player:
             await player.disconnect()
             ranint = random.randint(0, 3)
-            match ranint:
-                case 0:
-                    await interaction.response.send_message("I'll be back.")
-                case 1:
-                    await interaction.response.send_message("Unlimited Pow... - **LIMITED POWER**")
-                case 2:
-                    await interaction.response.send_message("Returning to code form")
-                case _:
-                    await interaction.response.send_message("I know it was you Callum... I think")
+            fun_messages = ["I'll be back.", "Unlimited Pow... - **LIMITED POWER**", "Returning to code form", "I know it was you Callum... I think"]
+            await interaction.response.send_message(fun_messages[ranint])
         else:
             await interaction.response.send_message("I am not in a voice channel Lackaffe", ephemeral=True)
 
